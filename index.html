@@ -1,0 +1,1213 @@
+<!DOCTYPE1 html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nitro Drivers 2P - Двухпользовательские Гонки</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            user-select: none;
+            overflow: hidden;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .font-title {
+            font-family: 'Russo One', sans-serif;
+        }
+        canvas {
+            display: block;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+        /* Neon text effects */
+        .neon-text-blue {
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.7), 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        .neon-text-red {
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.7), 0 0 20px rgba(239, 68, 68, 0.5);
+        }
+        .neon-text-gold {
+            text-shadow: 0 0 10px rgba(245, 158, 11, 0.7), 0 0 20px rgba(245, 158, 11, 0.5);
+        }
+        /* Animations */
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between items-center bg-slate-950 text-white relative">
+
+    <!-- Top Navigation Bar -->
+    <header class="w-full bg-slate-900/90 border-b border-slate-800 px-6 py-3 flex justify-between items-center backdrop-blur z-20">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-flag-checkered text-3xl text-yellow-500 animate-bounce"></i>
+            <h1 class="text-2xl font-title tracking-wider bg-gradient-to-r from-yellow-400 via-red-500 to-blue-500 bg-clip-text text-transparent">
+                NITRO DRIVERS 2P
+            </h1>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <!-- Balance Counter -->
+            <div class="flex items-center gap-2 bg-slate-800/80 px-4 py-2 rounded-xl border border-yellow-500/30">
+                <i class="fa-solid fa-coins text-yellow-400 text-xl"></i>
+                <span id="player-coins" class="text-xl font-bold font-title text-yellow-400">0</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <button onclick="openCheatModal()" class="px-3 py-2 bg-purple-900/50 hover:bg-purple-800 border border-purple-500/50 rounded-lg text-purple-200 text-sm font-semibold transition flex items-center gap-2">
+                <i class="fa-solid fa-terminal"></i> Чит-Коды
+            </button>
+            <button onclick="showScreen('main-menu')" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-300 text-sm font-semibold transition flex items-center gap-2">
+                <i class="fa-solid fa-house"></i> Меню
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN SCREEN CONTAINER -->
+    <main class="flex-1 w-full flex items-center justify-center p-4 relative overflow-hidden">
+        
+        <!-- 1. MAIN MENU -->
+        <div id="screen-main-menu" class="w-full max-w-4xl flex flex-col items-center gap-6 z-10">
+            <div class="text-center space-y-2">
+                <h2 class="text-5xl font-title neon-text-gold tracking-wide">ГОНКИ НА ДВОИХ</h2>
+                <p class="text-slate-400">Соревнуйтесь на одном экране, прокачивайте авто и побеждайте!</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mt-4">
+                <!-- Mode 1: Split Screen Race -->
+                <button onclick="showScreen('track-select')" class="group relative bg-slate-900/80 border-2 border-blue-500/40 hover:border-blue-500 p-6 rounded-2xl flex flex-col items-center text-center transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(59,130,246,0.3)]">
+                    <div class="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-500 group-hover:text-slate-950 transition">
+                        <i class="fa-solid fa-trophy text-3xl text-blue-400 group-hover:text-slate-950"></i>
+                    </div>
+                    <h3 class="text-xl font-title mb-2 text-blue-400">Дуэль Гонка</h3>
+                    <p class="text-xs text-slate-400">Гонка на 2 игроков на раздвоенном экране на выбор из 3 трасс.</p>
+                </button>
+
+                <!-- Mode 2: Garage & Shop -->
+                <button onclick="showScreen('garage')" class="group relative bg-slate-900/80 border-2 border-amber-500/40 hover:border-amber-500 p-6 rounded-2xl flex flex-col items-center text-center transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(245,158,11,0.3)]">
+                    <div class="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-amber-500 group-hover:text-slate-950 transition">
+                        <i class="fa-solid fa-warehouse text-3xl text-amber-400 group-hover:text-slate-950"></i>
+                    </div>
+                    <h3 class="text-xl font-title mb-2 text-amber-400">Гараж / Магазин</h3>
+                    <p class="text-xs text-slate-400">Покупка суперкаров, тюнинг двигателя, шин, нитро и выбор цвета.</p>
+                </button>
+
+                <!-- Mode 3: Mini Games -->
+                <button onclick="showScreen('minigames-select')" class="group relative bg-slate-900/80 border-2 border-red-500/40 hover:border-red-500 p-6 rounded-2xl flex flex-col items-center text-center transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(239,68,68,0.3)]">
+                    <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-red-500 group-hover:text-slate-950 transition">
+                        <i class="fa-solid fa-gamepad text-3xl text-red-400 group-hover:text-slate-950"></i>
+                    </div>
+                    <h3 class="text-xl font-title mb-2 text-red-400">Мини-Игры</h3>
+                    <p class="text-xs text-slate-400">Дрифт-мастер, Выживание на Арене и Охота за Монетами.</p>
+                </button>
+            </div>
+
+            <!-- Controls Quick Info -->
+            <div class="w-full bg-slate-900/60 border border-slate-800 rounded-xl p-4 flex justify-around text-center mt-2">
+                <div>
+                    <span class="text-xs font-bold text-blue-400 block mb-1">ИГРОК 1 (Синий)</span>
+                    <span class="text-xs bg-slate-800 px-2 py-1 rounded text-slate-300 font-mono">W A S D</span>
+                    <span class="text-xs text-slate-500 ml-2">(Нитро: L-Shift)</span>
+                </div>
+                <div class="border-r border-slate-800"></div>
+                <div>
+                    <span class="text-xs font-bold text-red-400 block mb-1">ИГРОК 2 (Красный)</span>
+                    <span class="text-xs bg-slate-800 px-2 py-1 rounded text-slate-300 font-mono">Стрелки ↑ ↓ ← →</span>
+                    <span class="text-xs text-slate-500 ml-2">(Нитро: R-Shift / Space)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. TRACK SELECT SCREEN -->
+        <div id="screen-track-select" class="hidden w-full max-w-4xl flex flex-col items-center gap-6 z-10">
+            <h2 class="text-3xl font-title text-blue-400">Выберите Трассу</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+                <!-- Track 1 -->
+                <div onclick="startRace('ring')" class="cursor-pointer bg-slate-900 border border-slate-700 hover:border-blue-500 rounded-xl overflow-hidden hover:scale-105 transition group">
+                    <div class="h-36 bg-slate-800 flex items-center justify-center relative overflow-hidden">
+                        <!-- Track Preview SVG -->
+                        <svg class="w-3/4 h-3/4 text-emerald-500 stroke-current fill-none stroke-[8]" viewBox="0 0 200 120">
+                            <rect x="20" y="20" width="160" height="80" rx="40"/>
+                        </svg>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-title text-lg text-emerald-400">Кольцевая Трасса</h3>
+                        <p class="text-xs text-slate-400 mt-1">Классический трэк. Отлично подходит для старта и проверки скорости.</p>
+                        <span class="inline-block mt-3 text-xs bg-emerald-950 text-emerald-300 px-2 py-1 rounded border border-emerald-800">Легко</span>
+                    </div>
+                </div>
+
+                <!-- Track 2 -->
+                <div onclick="startRace('desert')" class="cursor-pointer bg-slate-900 border border-slate-700 hover:border-blue-500 rounded-xl overflow-hidden hover:scale-105 transition group">
+                    <div class="h-36 bg-amber-950/40 flex items-center justify-center relative overflow-hidden">
+                        <svg class="w-3/4 h-3/4 text-amber-500 stroke-current fill-none stroke-[8]" viewBox="0 0 200 120">
+                            <path d="M 20 60 Q 60 10 100 60 T 180 60 Q 180 110 100 110 Z"/>
+                        </svg>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-title text-lg text-amber-400">Пустынные Каньоны</h3>
+                        <p class="text-xs text-slate-400 mt-1">Острые повороты, песчаные заносы и низкое сцепление шин.</p>
+                        <span class="inline-block mt-3 text-xs bg-amber-950 text-amber-300 px-2 py-1 rounded border border-amber-800">Средне</span>
+                    </div>
+                </div>
+
+                <!-- Track 3 -->
+                <div onclick="startRace('city')" class="cursor-pointer bg-slate-900 border border-slate-700 hover:border-blue-500 rounded-xl overflow-hidden hover:scale-105 transition group">
+                    <div class="h-36 bg-purple-950/40 flex items-center justify-center relative overflow-hidden">
+                        <svg class="w-3/4 h-3/4 text-purple-400 stroke-current fill-none stroke-[8]" viewBox="0 0 200 120">
+                            <path d="M 20 20 L 180 20 L 180 100 L 100 100 L 100 60 L 20 60 Z"/>
+                        </svg>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-title text-lg text-purple-400">Ночной Город</h3>
+                        <p class="text-xs text-slate-400 mt-1">Сложные угловые повороты 90 градусов. Требует отличного контроля.</p>
+                        <span class="inline-block mt-3 text-xs bg-purple-950 text-purple-300 px-2 py-1 rounded border border-purple-800">Сложно</span>
+                    </div>
+                </div>
+            </div>
+            <button onclick="showScreen('main-menu')" class="mt-4 text-slate-400 hover:text-white transition">← Назад в меню</button>
+        </div>
+
+        <!-- 3. GARAGE / SHOP SCREEN -->
+        <div id="screen-garage" class="hidden w-full max-w-5xl flex flex-col gap-4 z-10 h-full max-h-[85vh]">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h2 class="text-3xl font-title text-amber-400">Гараж и Магазин Авто</h2>
+                <!-- Player Selector Tabs -->
+                <div class="flex bg-slate-900 p-1 rounded-lg border border-slate-800">
+                    <button id="tab-p1" onclick="selectGaragePlayer(1)" class="px-4 py-1.5 rounded-md text-sm font-bold bg-blue-600 text-white transition">Игрок 1</button>
+                    <button id="tab-p2" onclick="selectGaragePlayer(2)" class="px-4 py-1.5 rounded-md text-sm font-bold text-slate-400 hover:text-white transition">Игрок 2</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 overflow-hidden">
+                <!-- Car Selector List -->
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 flex flex-col gap-3 overflow-y-auto max-h-[500px]">
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Доступные Машины</h3>
+                    <div id="car-list" class="flex flex-col gap-2">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Active Car Preview & Color Picker -->
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-6 flex flex-col items-center justify-between">
+                    <h3 id="garage-car-name" class="text-2xl font-title text-white">Суперкар</h3>
+                    
+                    <!-- SVG Visual Preview Canvas -->
+                    <div class="w-48 h-64 bg-slate-950/80 rounded-xl border border-slate-800 flex items-center justify-center relative p-4">
+                        <canvas id="garage-car-canvas" width="120" height="200"></canvas>
+                    </div>
+
+                    <!-- Color customization -->
+                    <div class="w-full">
+                        <label class="text-xs text-slate-400 mb-2 block text-center">Цвет кузова</label>
+                        <div class="flex justify-center gap-2" id="color-picker-container">
+                            <!-- Populated JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats & Upgrades -->
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-title text-white mb-4">Характеристики и Тюнинг</h3>
+                        
+                        <!-- Stat Bars -->
+                        <div class="space-y-4 mb-6">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-slate-400">Скорость</span>
+                                    <span id="stat-speed-val" class="font-bold text-blue-400">100</span>
+                                </div>
+                                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                    <div id="stat-speed-bar" class="bg-blue-500 h-full transition-all duration-300" style="width: 50%"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-slate-400">Ускорение</span>
+                                    <span id="stat-acc-val" class="font-bold text-green-400">100</span>
+                                </div>
+                                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                    <div id="stat-acc-bar" class="bg-green-500 h-full transition-all duration-300" style="width: 50%"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-slate-400">Управляемость</span>
+                                    <span id="stat-turn-val" class="font-bold text-purple-400">100</span>
+                                </div>
+                                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                    <div id="stat-turn-bar" class="bg-purple-500 h-full transition-all duration-300" style="width: 50%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upgrade Upgrades buttons -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center bg-slate-800/50 p-2.5 rounded-lg border border-slate-700">
+                                <div>
+                                    <div class="text-xs font-bold">Двигатель (Скорость)</div>
+                                    <div id="lvl-engine" class="text-[10px] text-slate-400">Ур. 1</div>
+                                </div>
+                                <button onclick="buyUpgrade('engine')" id="btn-upgrade-engine" class="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded transition">
+                                    500 🪙
+                                </button>
+                            </div>
+
+                            <div class="flex justify-between items-center bg-slate-800/50 p-2.5 rounded-lg border border-slate-700">
+                                <div>
+                                    <div class="text-xs font-bold">Шины (Управляемость)</div>
+                                    <div id="lvl-tires" class="text-[10px] text-slate-400">Ур. 1</div>
+                                </div>
+                                <button onclick="buyUpgrade('tires')" id="btn-upgrade-tires" class="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded transition">
+                                    500 🪙
+                                </button>
+                            </div>
+
+                            <div class="flex justify-between items-center bg-slate-800/50 p-2.5 rounded-lg border border-slate-700">
+                                <div>
+                                    <div class="text-xs font-bold">Нитро Ускоритель</div>
+                                    <div id="lvl-nitro" class="text-[10px] text-slate-400">Ур. 1</div>
+                                </div>
+                                <button onclick="buyUpgrade('nitro')" id="btn-upgrade-nitro" class="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded transition">
+                                    500 🪙
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Buy / Select Car Action -->
+                    <div class="mt-4 pt-4 border-t border-slate-800">
+                        <button id="btn-car-action" onclick="handleCarAction()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-title text-sm rounded-xl shadow-lg transition">
+                            ВЫБРАТЬ АВТО
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. MINIGAMES SELECT SCREEN -->
+        <div id="screen-minigames-select" class="hidden w-full max-w-4xl flex flex-col items-center gap-6 z-10">
+            <h2 class="text-3xl font-title text-red-400">Мини-Игры</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+                <!-- Drift Master -->
+                <div onclick="startMiniGame('drift')" class="cursor-pointer bg-slate-900 border border-slate-700 hover:border-red-500 rounded-xl p-6 flex flex-col items-center text-center hover:scale-105 transition">
+                    <div class="w-16 h-16 bg-red-500/10 text-red-400 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-wind text-3xl"></i>
+                    </div>
+                    <h3 class="font-title text-lg text-red-400 mb-2">Дрифт-Мастер</h3>
+                    <p class="text-xs text-slate-400">Зарабатывайте очки дрифта затяжными скольжениями за ограничение по времени! (Одиночно / Соревновательно)</p>
+                </div>
+
+                <!-- Bumper Cars Arena -->
+                <div onclick="startMiniGame('arena')" class="cursor-pointer bg-slate-900 border border-slate-700 hover:border-amber-500 rounded-xl p-6 flex flex-col items-center text-center hover:scale-105 transition">
+                    <div class="w-16 h-16 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-car-burst text-3xl"></i>
+                    </div>
+                    <h3 class="font-title text-lg text-amber-400 mb-2">Выживание на Арене</h3>
+                    <p class="text-xs text-slate-400">Выталкивайте соперника из сужающейся арены дерби! Побеждает выживший.</p>
+                </div>
+
+                <!-- Coin Rush -->
+                <div onclick="startMiniGame('coins')" class="cursor-pointer bg-slate-900 border border-slate-700 hover:border-yellow-500 rounded-xl p-6 flex flex-col items-center text-center hover:scale-105 transition">
+                    <div class="w-16 h-16 bg-yellow-500/10 text-yellow-400 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-coins text-3xl"></i>
+                    </div>
+                    <h3 class="font-title text-lg text-yellow-400 mb-2">Сбор Монет</h3>
+                    <p class="text-xs text-slate-400">Собирайте золотые монеты на поле и уворачивайтесь от взрывных мин!</p>
+                </div>
+            </div>
+            <button onclick="showScreen('main-menu')" class="mt-4 text-slate-400 hover:text-white transition">← Назад в меню</button>
+        </div>
+
+        <!-- 5. GAME CANVAS DISPLAY (CONTAINER) -->
+        <div id="screen-game" class="hidden relative w-full h-full flex flex-col items-center justify-center">
+            
+            <!-- In-Game HUD overlay -->
+            <div id="game-hud" class="absolute top-2 left-4 right-4 flex justify-between items-start pointer-events-none z-10">
+                <!-- P1 HUD -->
+                <div class="bg-slate-900/80 backdrop-blur border border-blue-500/50 p-3 rounded-xl flex flex-col gap-1 min-w-[160px]">
+                    <div class="text-xs font-bold text-blue-400">ИГРОК 1</div>
+                    <div id="hud-p1-speed" class="text-lg font-title text-white">0 КМ/Ч</div>
+                    <!-- Nitro Bar P1 -->
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden mt-1">
+                        <div id="hud-p1-nitro" class="bg-cyan-400 h-full w-full transition-all"></div>
+                    </div>
+                    <div id="hud-p1-extra" class="text-xs text-yellow-400 font-bold mt-1">Круг: 1/3</div>
+                </div>
+
+                <!-- Center Status Info / Timer -->
+                <div class="bg-slate-900/90 backdrop-blur border border-slate-700 px-6 py-2 rounded-xl text-center">
+                    <div id="hud-title" class="text-xs font-bold text-slate-400 uppercase">Гонка</div>
+                    <div id="hud-main-status" class="text-xl font-title text-yellow-400">00:00</div>
+                </div>
+
+                <!-- P2 HUD -->
+                <div class="bg-slate-900/80 backdrop-blur border border-red-500/50 p-3 rounded-xl flex flex-col gap-1 min-w-[160px] text-right">
+                    <div class="text-xs font-bold text-red-400">ИГРОК 2</div>
+                    <div id="hud-p2-speed" class="text-lg font-title text-white">0 КМ/Ч</div>
+                    <!-- Nitro Bar P2 -->
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden mt-1">
+                        <div id="hud-p2-nitro" class="bg-red-400 h-full w-full transition-all"></div>
+                    </div>
+                    <div id="hud-p2-extra" class="text-xs text-yellow-400 font-bold mt-1">Круг: 1/3</div>
+                </div>
+            </div>
+
+            <!-- Canvas Element -->
+            <canvas id="gameCanvas" class="w-full h-full rounded-2xl bg-slate-950 border border-slate-800"></canvas>
+
+            <!-- Game Over / Victory Modal Overlay -->
+            <div id="game-overlay" class="hidden absolute inset-0 bg-slate-950/90 backdrop-blur flex flex-col items-center justify-center gap-6 z-30">
+                <h2 id="overlay-title" class="text-5xl font-title neon-text-gold">ПОБЕДА!</h2>
+                <p id="overlay-subtitle" class="text-xl text-slate-300">Игрок 1 выиграл гонку!</p>
+                <div id="overlay-rewards" class="text-yellow-400 font-title text-2xl bg-yellow-500/10 px-6 py-2 rounded-xl border border-yellow-500/30">
+                    +500 Монет
+                </div>
+                <div class="flex gap-4 mt-4">
+                    <button onclick="restartCurrentGame()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-title rounded-xl transition">
+                        Играть Снова
+                    </button>
+                    <button onclick="showScreen('main-menu')" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-title rounded-xl transition">
+                        В Главное Меню
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- CHEAT MODAL -->
+    <div id="modal-cheat" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur flex items-center justify-center z-50">
+        <div class="bg-slate-900 border border-purple-500/40 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-xl font-title text-purple-400 flex items-center gap-2">
+                    <i class="fa-solid fa-terminal"></i> Консоль Чит-Кодов
+                </h3>
+                <button onclick="closeCheatModal()" class="text-slate-500 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <p class="text-xs text-slate-400">Вводите секретные коды для получения ресурсов и бонусов.</p>
+
+            <div class="space-y-2">
+                <input type="text" id="cheat-input" placeholder="Введите код (напр. MONEY999999)..." class="w-full bg-slate-950 border border-purple-500/40 rounded-xl px-4 py-3 text-white font-mono uppercase focus:outline-none focus:border-purple-400">
+                <button onclick="submitCheat()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition">
+                    АКТИВИРОВАТЬ
+                </button>
+            </div>
+
+            <!-- Hint list -->
+            <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1 font-mono">
+                <div><span class="text-purple-400 font-bold">MONEY999999</span> — +999,999 Монет</div>
+                <div><span class="text-purple-400 font-bold">SPEEDSTER</span> — Перегрузка скорости всех машин</div>
+                <div><span class="text-purple-400 font-bold">UNLOCKALL</span> — Разблокировать все машины</div>
+                <div><span class="text-purple-400 font-bold">GODMODE</span> — Бесконечное Нитро</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 border border-yellow-500 text-yellow-400 font-bold px-4 py-3 rounded-xl shadow-2xl transition-all opacity-0 translate-y-10 pointer-events-none z-50 flex items-center gap-2">
+        <i class="fa-solid fa-circle-info"></i>
+        <span id="toast-text">Уведомление</span>
+    </div>
+
+    <!-- GAME LOGIC SCRIPT -->
+    <script>
+        /* --- GLOBAL GAME STATE & CONSTANTS --- */
+        const STORAGE_KEY = 'NITRO_DRIVERS_2P_SAVE_V1';
+
+        // Car Templates Catalog
+        const CAR_CATALOG = [
+            { id: 'hatchback', name: 'Racer Hatch', price: 0, speed: 7, accel: 0.15, turn: 0.05, width: 26, height: 44 },
+            { id: 'sedan', name: 'Street Sedan', price: 1000, speed: 8.5, accel: 0.18, turn: 0.055, width: 28, height: 46 },
+            { id: 'muscle', name: 'V8 Muscle', price: 3000, speed: 10, accel: 0.22, turn: 0.045, width: 30, height: 48 },
+            { id: 'supercar', name: 'Apex Super', price: 7500, speed: 11.5, accel: 0.25, turn: 0.065, width: 30, height: 50 },
+            { id: 'hypercar', name: 'Phantom Hyper', price: 15000, speed: 13, accel: 0.3, turn: 0.07, width: 32, height: 52 }
+        ];
+
+        const COLOR_OPTIONS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#f97316', '#ffffff'];
+
+        // User Data Structure
+        let userData = {
+            coins: 1000,
+            unlockedCars: ['hatchback'],
+            p1: { carId: 'hatchback', color: '#3b82f6', upgrades: { engine: 1, tires: 1, nitro: 1 } },
+            p2: { carId: 'hatchback', color: '#ef4444', upgrades: { engine: 1, tires: 1, nitro: 1 } }
+        };
+
+        // Cheats Active State
+        let cheatState = { speedster: false, godmode: false };
+
+        // Save & Load Logic
+        function loadSaveData() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                try {
+                    const parsed = JSON.parse(raw);
+                    userData = { ...userData, ...parsed };
+                } catch(e) { console.error("Save loading error:", e); }
+            }
+            updateUI();
+        }
+
+        function saveGameData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('player-coins').innerText = userData.coins.toLocaleString();
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-text').innerText = msg;
+            toast.classList.remove('opacity-0', 'translate-y-10');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-10');
+            }, 3000);
+        }
+
+        /* --- SCREEN SWITCHING --- */
+        function showScreen(screenId) {
+            // Hide all screens
+            ['main-menu', 'track-select', 'garage', 'minigames-select', 'game'].forEach(id => {
+                document.getElementById(`screen-${id}`).classList.add('hidden');
+            });
+            // Show targeted
+            document.getElementById(`screen-${screenId}`).classList.remove('hidden');
+
+            if (screenId === 'garage') {
+                initGarageUI();
+            } else if (screenId !== 'game') {
+                stopGameLoop();
+            }
+        }
+
+        /* --- GARAGE & SHOP SYSTEM --- */
+        let activeGaragePlayer = 1;
+        let selectedCarIdInGarage = 'hatchback';
+
+        function selectGaragePlayer(pNum) {
+            activeGaragePlayer = pNum;
+            document.getElementById('tab-p1').className = pNum === 1 ? 'px-4 py-1.5 rounded-md text-sm font-bold bg-blue-600 text-white transition' : 'px-4 py-1.5 rounded-md text-sm font-bold text-slate-400 hover:text-white transition';
+            document.getElementById('tab-p2').className = pNum === 2 ? 'px-4 py-1.5 rounded-md text-sm font-bold bg-red-600 text-white transition' : 'px-4 py-1.5 rounded-md text-sm font-bold text-slate-400 hover:text-white transition';
+            
+            selectedCarIdInGarage = userData[`p${pNum}`].carId;
+            renderGarageDetails();
+        }
+
+        function initGarageUI() {
+            selectedCarIdInGarage = userData[`p${activeGaragePlayer}`].carId;
+            
+            // Build Color Picker Buttons
+            const colorContainer = document.getElementById('color-picker-container');
+            colorContainer.innerHTML = '';
+            COLOR_OPTIONS.forEach(col => {
+                const btn = document.createElement('button');
+                btn.className = 'w-7 h-7 rounded-full border-2 border-slate-700 hover:scale-110 transition';
+                btn.style.backgroundColor = col;
+                btn.onclick = () => {
+                    userData[`p${activeGaragePlayer}`].color = col;
+                    saveGameData();
+                    drawGarageCarPreview();
+                };
+                colorContainer.appendChild(btn);
+            });
+
+            renderGarageDetails();
+        }
+
+        function renderGarageDetails() {
+            const pData = userData[`p${activeGaragePlayer}`];
+            const carListContainer = document.getElementById('car-list');
+            carListContainer.innerHTML = '';
+
+            CAR_CATALOG.forEach(car => {
+                const isUnlocked = userData.unlockedCars.includes(car.id);
+                const isSelected = pData.carId === car.id;
+                
+                const card = document.createElement('div');
+                card.onclick = () => { selectedCarIdInGarage = car.id; renderGarageDetails(); };
+                card.className = `p-3 rounded-xl border flex items-center justify-between cursor-pointer transition ${
+                    selectedCarIdInGarage === car.id ? 'border-amber-500 bg-amber-500/10' : 'border-slate-800 bg-slate-950/40 hover:border-slate-700'
+                }`;
+
+                card.innerHTML = `
+                    <div>
+                        <div class="font-bold text-sm text-white">${car.name}</div>
+                        <div class="text-[11px] text-slate-400">Скорость: ${car.speed}</div>
+                    </div>
+                    <div>
+                        ${isUnlocked ? (isSelected ? '<span class="text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded">Выбрано</span>' : '<span class="text-xs text-slate-400">Владеете</span>') 
+                                     : `<span class="text-xs font-bold text-yellow-400 bg-yellow-950/60 border border-yellow-800 px-2 py-0.5 rounded"><i class="fa-solid fa-coins mr-1"></i>${car.price}</span>`}
+                    </div>
+                `;
+                carListContainer.appendChild(card);
+            });
+
+            // Update stats
+            const curCar = CAR_CATALOG.find(c => c.id === selectedCarIdInGarage);
+            document.getElementById('garage-car-name').innerText = curCar.name;
+
+            const speedCalc = (curCar.speed + pData.upgrades.engine * 0.8) * 10;
+            const accCalc = (curCar.accel + pData.upgrades.nitro * 0.05) * 300;
+            const turnCalc = (curCar.turn + pData.upgrades.tires * 0.01) * 1000;
+
+            document.getElementById('stat-speed-val').innerText = Math.round(speedCalc);
+            document.getElementById('stat-speed-bar').style.width = `${Math.min(100, speedCalc / 1.8)}%`;
+
+            document.getElementById('stat-acc-val').innerText = Math.round(accCalc);
+            document.getElementById('stat-acc-bar').style.width = `${Math.min(100, accCalc / 1.5)}%`;
+
+            document.getElementById('stat-turn-val').innerText = Math.round(turnCalc);
+            document.getElementById('stat-turn-bar').style.width = `${Math.min(100, turnCalc / 1.2)}%`;
+
+            // Upgrade Costs
+            ['engine', 'tires', 'nitro'].forEach(upg => {
+                const lvl = pData.upgrades[upg];
+                document.getElementById(`lvl-${upg}`).innerText = `Уровень ${lvl}`;
+                const cost = lvl * 500;
+                document.getElementById(`btn-upgrade-${upg}`).innerText = `${cost} 🪙`;
+            });
+
+            // Action Button
+            const isUnlocked = userData.unlockedCars.includes(curCar.id);
+            const btnAction = document.getElementById('btn-car-action');
+            if (isUnlocked) {
+                btnAction.innerText = pData.carId === curCar.id ? 'ВЫБРАНО' : 'ВЫБРАТЬ ЭТО АВТО';
+                btnAction.className = 'w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-title text-sm rounded-xl transition';
+            } else {
+                btnAction.innerText = `КУПИТЬ ЗА ${curCar.price} 🪙`;
+                btnAction.className = 'w-full py-3 bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-title text-sm rounded-xl transition';
+            }
+
+            drawGarageCarPreview();
+        }
+
+        function handleCarAction() {
+            const curCar = CAR_CATALOG.find(c => c.id === selectedCarIdInGarage);
+            const isUnlocked = userData.unlockedCars.includes(curCar.id);
+            const pData = userData[`p${activeGaragePlayer}`];
+
+            if (isUnlocked) {
+                pData.carId = curCar.id;
+                saveGameData();
+                renderGarageDetails();
+                showToast(`Игрок ${activeGaragePlayer} выбрал ${curCar.name}!`);
+            } else {
+                if (userData.coins >= curCar.price) {
+                    userData.coins -= curCar.price;
+                    userData.unlockedCars.push(curCar.id);
+                    pData.carId = curCar.id;
+                    saveGameData();
+                    renderGarageDetails();
+                    showToast(`Авто ${curCar.name} успешно куплено!`);
+                } else {
+                    showToast('Недостаточно монет!');
+                }
+            }
+        }
+
+        function buyUpgrade(type) {
+            const pData = userData[`p${activeGaragePlayer}`];
+            const cost = pData.upgrades[type] * 500;
+
+            if (userData.coins >= cost) {
+                userData.coins -= cost;
+                pData.upgrades[type]++;
+                saveGameData();
+                renderGarageDetails();
+                showToast(`Улучшение ${type.toUpperCase()} повышено до ур. ${pData.upgrades[type]}!`);
+            } else {
+                showToast('Недостаточно монет!');
+            }
+        }
+
+        function drawGarageCarPreview() {
+            const canvas = document.getElementById('garage-car-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const color = userData[`p${activeGaragePlayer}`].color;
+            const car = CAR_CATALOG.find(c => c.id === selectedCarIdInGarage);
+
+            // Center rendering
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            drawCarGraphic(ctx, 0, 0, 0, color, car.width * 1.5, car.height * 1.5);
+            ctx.restore();
+        }
+
+        /* --- CHEAT SYSTEM MODAL --- */
+        function openCheatModal() {
+            document.getElementById('modal-cheat').classList.remove('hidden');
+            document.getElementById('cheat-input').focus();
+        }
+
+        function closeCheatModal() {
+            document.getElementById('modal-cheat').classList.add('hidden');
+        }
+
+        function submitCheat() {
+            const input = document.getElementById('cheat-input').value.trim().toUpperCase();
+            document.getElementById('cheat-input').value = '';
+
+            if (input === 'MONEY999999') {
+                userData.coins += 999999;
+                saveGameData();
+                showToast('Чит Активирован: +999,999 Монет!');
+                closeCheatModal();
+            } else if (input === 'SPEEDSTER') {
+                cheatState.speedster = true;
+                showToast('Чит Активирован: Сверх-скорость!');
+                closeCheatModal();
+            } else if (input === 'UNLOCKALL') {
+                userData.unlockedCars = CAR_CATALOG.map(c => c.id);
+                saveGameData();
+                showToast('Чит Активирован: Все авто разблокированы!');
+                closeCheatModal();
+            } else if (input === 'GODMODE') {
+                cheatState.godmode = true;
+                showToast('Чит Активирован: Бесконечное Нитро!');
+                closeCheatModal();
+            } else {
+                showToast('Неверный чит-код!');
+            }
+        }
+
+        /* --- GRAPHICS ENGINE & CAR DRAWING --- */
+        function drawCarGraphic(ctx, x, y, angle, color, w = 30, h = 50) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+
+            // Wheels
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(-w/2 - 2, -h/2 + 6, 4, 10);
+            ctx.fillRect(w/2 - 2, -h/2 + 6, 4, 10);
+            ctx.fillRect(-w/2 - 2, h/2 - 16, 4, 10);
+            ctx.fillRect(w/2 - 2, h/2 - 16, 4, 10);
+
+            // Body Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.beginPath();
+            ctx.roundRect(-w/2 + 2, -h/2 + 2, w, h, 8);
+            ctx.fill();
+
+            // Main Car Body
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.roundRect(-w/2, -h/2, w, h, 8);
+            ctx.fill();
+
+            // Roof / Windshield
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.roundRect(-w/2 + 4, -h/2 + 12, w - 8, h - 24, 4);
+            ctx.fill();
+
+            // Front Glass
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath();
+            ctx.roundRect(-w/2 + 5, -h/2 + 14, w - 10, 8, 2);
+            ctx.fill();
+
+            // Headlights
+            ctx.fillStyle = '#fef08a';
+            ctx.fillRect(-w/2 + 3, -h/2 + 1, 5, 3);
+            ctx.fillRect(w/2 - 8, -h/2 + 1, 5, 3);
+
+            // Taillights
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(-w/2 + 3, h/2 - 4, 5, 3);
+            ctx.fillRect(w/2 - 8, h/2 - 4, 5, 3);
+
+            ctx.restore();
+        }
+
+        /* --- GAME LOGIC ENGINE (RACING / MINIGAMES) --- */
+        let canvas, ctx;
+        let animationFrameId = null;
+        let gameMode = 'race'; // 'race', 'drift', 'arena', 'coins'
+        let currentTrack = 'ring';
+        let gameTime = 0;
+        let isGameOver = false;
+
+        // Key states
+        const keys = {};
+
+        window.addEventListener('keydown', e => { keys[e.code] = true; });
+        window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+        // Physics Entities
+        class Car {
+            constructor(pNum, startX, startY, startAngle) {
+                this.pNum = pNum;
+                this.x = startX;
+                this.y = startY;
+                this.angle = startAngle;
+                this.speed = 0;
+                
+                const pData = userData[`p${pNum}`];
+                const baseCar = CAR_CATALOG.find(c => c.id === pData.carId) || CAR_CATALOG[0];
+
+                this.maxSpeed = (baseCar.speed + pData.upgrades.engine * 0.8) * (cheatState.speedster ? 1.5 : 1.0);
+                this.accel = baseCar.accel + pData.upgrades.nitro * 0.03;
+                this.turnSpeed = baseCar.turn + pData.upgrades.tires * 0.008;
+                this.color = pData.color;
+                this.width = baseCar.width;
+                this.height = baseCar.height;
+
+                this.nitro = 100;
+                this.isNitroActive = false;
+                this.laps = 0;
+                this.checkpointPassed = false;
+                this.driftPoints = 0;
+                this.isDead = false;
+                this.skidMarks = [];
+            }
+
+            update() {
+                if (this.isDead) return;
+
+                // Input mapping
+                let up = false, down = false, left = false, right = false, nitroKey = false;
+
+                if (this.pNum === 1) {
+                    up = keys['KeyW'];
+                    down = keys['KeyS'];
+                    left = keys['KeyA'];
+                    right = keys['KeyD'];
+                    nitroKey = keys['ShiftLeft'];
+                } else {
+                    up = keys['ArrowUp'];
+                    down = keys['ArrowDown'];
+                    left = keys['ArrowLeft'];
+                    right = keys['ArrowRight'];
+                    nitroKey = keys['ShiftRight'] || keys['Space'];
+                }
+
+                // Nitro activation
+                if (nitroKey && (this.nitro > 0 || cheatState.godmode)) {
+                    this.isNitroActive = true;
+                    if (!cheatState.godmode) this.nitro -= 0.8;
+                } else {
+                    this.isNitroActive = false;
+                    if (this.nitro < 100) this.nitro += 0.2;
+                }
+
+                const currentMaxSpeed = this.isNitroActive ? this.maxSpeed * 1.4 : this.maxSpeed;
+
+                // Acceleration
+                if (up) {
+                    this.speed = Math.min(this.speed + this.accel, currentMaxSpeed);
+                } else if (down) {
+                    this.speed = Math.max(this.speed - this.accel * 0.8, -currentMaxSpeed * 0.4);
+                } else {
+                    this.speed *= 0.96; // Friction
+                }
+
+                // Steering
+                if (Math.abs(this.speed) > 0.2) {
+                    const dir = this.speed > 0 ? 1 : -1;
+                    if (left) this.angle -= this.turnSpeed * dir;
+                    if (right) this.angle += this.turnSpeed * dir;
+                }
+
+                // Drift detection & skid marks
+                if ((left || right) && Math.abs(this.speed) > 4) {
+                    this.driftPoints += Math.round(Math.abs(this.speed));
+                    if (Math.random() < 0.4) {
+                        this.skidMarks.push({ x: this.x, y: this.y, alpha: 0.6 });
+                    }
+                }
+
+                // Fade skid marks
+                this.skidMarks.forEach(s => s.alpha -= 0.01);
+                this.skidMarks = this.skidMarks.filter(s => s.alpha > 0);
+
+                // Position movement
+                this.x += Math.sin(this.angle) * this.speed;
+                this.y -= Math.cos(this.angle) * this.speed;
+            }
+
+            draw(ctx) {
+                if (this.isDead) return;
+
+                // Draw Skid Marks
+                this.skidMarks.forEach(s => {
+                    ctx.fillStyle = `rgba(15, 23, 42, ${s.alpha})`;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                // Draw Nitro Flame Trail
+                if (this.isNitroActive) {
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.angle);
+                    ctx.fillStyle = '#06b6d4';
+                    ctx.beginPath();
+                    ctx.arc(0, this.height / 2 + 8, 6 + Math.random() * 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                drawCarGraphic(ctx, this.x, this.y, this.angle, this.color, this.width, this.height);
+            }
+        }
+
+        // Global Game Entities
+        let p1Car, p2Car;
+        let gameCoins = [];
+        let gameBombs = [];
+        let arenaRadius = 350;
+
+        function resizeCanvas() {
+            const container = document.getElementById('screen-game');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+
+        function startRace(trackId) {
+            gameMode = 'race';
+            currentTrack = trackId;
+            initGameEngine();
+        }
+
+        function startMiniGame(mode) {
+            gameMode = mode;
+            initGameEngine();
+        }
+
+        function initGameEngine() {
+            showScreen('game');
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+
+            isGameOver = false;
+            gameTime = 0;
+            document.getElementById('game-overlay').classList.add('hidden');
+
+            // Setup entities based on mode
+            if (gameMode === 'race') {
+                p1Car = new Car(1, canvas.width / 2 - 40, canvas.height - 120, 0);
+                p2Car = new Car(2, canvas.width / 2 + 40, canvas.height - 120, 0);
+            } else if (gameMode === 'drift') {
+                p1Car = new Car(1, canvas.width / 2 - 50, canvas.height / 2, 0);
+                p2Car = new Car(2, canvas.width / 2 + 50, canvas.height / 2, 0);
+            } else if (gameMode === 'arena') {
+                arenaRadius = Math.min(canvas.width, canvas.height) * 0.4;
+                p1Car = new Car(1, canvas.width / 2 - 100, canvas.height / 2, Math.PI / 2);
+                p2Car = new Car(2, canvas.width / 2 + 100, canvas.height / 2, -Math.PI / 2);
+            } else if (gameMode === 'coins') {
+                p1Car = new Car(1, canvas.width / 2 - 100, canvas.height / 2, 0);
+                p2Car = new Car(2, canvas.width / 2 + 100, canvas.height / 2, 0);
+                spawnCoinsAndBombs();
+            }
+
+            stopGameLoop();
+            animate();
+        }
+
+        function stopGameLoop() {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+        }
+
+        function spawnCoinsAndBombs() {
+            gameCoins = [];
+            gameBombs = [];
+            for (let i = 0; i < 20; i++) {
+                gameCoins.push({
+                    x: Math.random() * (canvas.width - 200) + 100,
+                    y: Math.random() * (canvas.height - 200) + 100
+                });
+            }
+            for (let i = 0; i < 8; i++) {
+                gameBombs.push({
+                    x: Math.random() * (canvas.width - 200) + 100,
+                    y: Math.random() * (canvas.height - 200) + 100
+                });
+            }
+        }
+
+        /* --- MAIN ANIMATION LOOP --- */
+        function animate() {
+            gameTime += 1 / 60;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Draw World / Track Background
+            drawTrackBackground();
+
+            // 2. Update & Draw Entities
+            p1Car.update();
+            p2Car.update();
+
+            // Car-to-Car Bumper Collision
+            handleCarCollision(p1Car, p2Car);
+
+            p1Car.draw(ctx);
+            p2Car.draw(ctx);
+
+            // 3. Game Mode Logic Checkers
+            if (gameMode === 'race') {
+                updateRaceLogic();
+            } else if (gameMode === 'drift') {
+                updateDriftLogic();
+            } else if (gameMode === 'arena') {
+                updateArenaLogic();
+            } else if (gameMode === 'coins') {
+                updateCoinsLogic();
+            }
+
+            // 4. Update HUD
+            updateHUD();
+
+            if (!isGameOver) {
+                animationFrameId = requestAnimationFrame(animate);
+            }
+        }
+
+        /* --- TRACK RENDERER --- */
+        function drawTrackBackground() {
+            if (gameMode === 'race') {
+                // Background Track Ground
+                ctx.fillStyle = currentTrack === 'desert' ? '#78350f' : '#0f172a';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Circuit Asphalt Outer Ring
+                ctx.strokeStyle = '#334155';
+                ctx.lineWidth = 100;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                
+                if (currentTrack === 'ring') {
+                    ctx.roundRect(120, 120, canvas.width - 240, canvas.height - 240, 120);
+                } else if (currentTrack === 'desert') {
+                    ctx.ellipse(canvas.width/2, canvas.height/2, canvas.width*0.35, canvas.height*0.3, 0, 0, Math.PI*2);
+                } else {
+                    // City Track Turns
+                    ctx.rect(150, 150, canvas.width - 300, canvas.height - 300);
+                }
+                ctx.stroke();
+
+                // Finish Line
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(canvas.width / 2 - 60, canvas.height - 170, 120, 10);
+            } 
+            else if (gameMode === 'arena') {
+                // Shrinking Derby Arena
+                ctx.fillStyle = '#1e1b4b';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                arenaRadius = Math.max(100, arenaRadius - 0.15);
+
+                ctx.fillStyle = '#312e81';
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, canvas.height / 2, arenaRadius, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 6;
+                ctx.stroke();
+            } 
+            else {
+                // Drift / Coin Open Grid
+                ctx.fillStyle = '#090d16';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = 1;
+                for (let x = 0; x < canvas.width; x += 60) {
+                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+                }
+                for (let y = 0; y < canvas.height; y += 60) {
+                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+                }
+            }
+        }
+
+        /* --- CAR COLLISION LOGIC --- */
+        function handleCarCollision(c1, c2) {
+            const dx = c2.x - c1.x;
+            const dy = c2.y - c1.y;
+            const dist = Math.hypot(dx, dy);
+            const minDist = (c1.width + c2.width) / 1.5;
+
+            if (dist < minDist) {
+                const angle = Math.atan2(dy, dx);
+                const push = (minDist - dist) / 2;
+
+                c1.x -= Math.cos(angle) * push;
+                c1.y -= Math.sin(angle) * push;
+                c2.x += Math.cos(angle) * push;
+                c2.y += Math.sin(angle) * push;
+
+                // Transfer Bumper Momentum
+                c1.speed *= -0.5;
+                c2.speed *= -0.5;
+            }
+        }
+
+        /* --- MODE LOGIC HANDLERS --- */
+        function updateRaceLogic() {
+            const finishY = canvas.height - 170;
+            const midY = canvas.height / 2;
+
+            [p1Car, p2Car].forEach(c => {
+                // Checkpoint check
+                if (c.y < midY) c.checkpointPassed = true;
+                
+                // Lap finish check
+                if (c.checkpointPassed && Math.abs(c.y - finishY) < 30 && Math.abs(c.x - canvas.width / 2) < 80) {
+                    c.laps++;
+                    c.checkpointPassed = false;
+                    if (c.laps >= 3 && !isGameOver) {
+                        endGame(c.pNum === 1 ? 'Игрок 1 (Синий)' : 'Игрок 2 (Красный)', 500);
+                    }
+                }
+            });
+        }
+
+        function updateDriftLogic() {
+            if (gameTime >= 30 && !isGameOver) {
+                const winner = p1Car.driftPoints > p2Car.driftPoints ? 'Игрок 1 (Синий)' : (p2Car.driftPoints > p1Car.driftPoints ? 'Игрок 2 (Красный)' : 'Ничья');
+                endGame(winner, Math.max(p1Car.driftPoints, p2Car.driftPoints) / 10);
+            }
+        }
+
+        function updateArenaLogic() {
+            const centerDistP1 = Math.hypot(p1Car.x - canvas.width / 2, p1Car.y - canvas.height / 2);
+            const centerDistP2 = Math.hypot(p2Car.x - canvas.width / 2, p2Car.y - canvas.height / 2);
+
+            if (centerDistP1 > arenaRadius) p1Car.isDead = true;
+            if (centerDistP2 > arenaRadius) p2Car.isDead = true;
+
+            if ((p1Car.isDead || p2Car.isDead) && !isGameOver) {
+                const winner = !p1Car.isDead ? 'Игрок 1 (Синий)' : (!p2Car.isDead ? 'Игрок 2 (Красный)' : 'Ничья');
+                endGame(winner, 400);
+            }
+        }
+
+        function updateCoinsLogic() {
+            // Draw Coins
+            gameCoins.forEach((coin, idx) => {
+                ctx.fillStyle = '#f59e0b';
+                ctx.beginPath();
+                ctx.arc(coin.x, coin.y, 10, 0, Math.PI * 2);
+                ctx.fill();
+
+                [p1Car, p2Car].forEach(c => {
+                    if (Math.hypot(c.x - coin.x, c.y - coin.y) < 25) {
+                        c.driftPoints += 100; // Reuse driftPoints property for coin score
+                        gameCoins.splice(idx, 1);
+                    }
+                });
+            });
+
+            // Draw Bombs
+            gameBombs.forEach((bomb, idx) => {
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(bomb.x, bomb.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                [p1Car, p2Car].forEach(c => {
+                    if (Math.hypot(c.x - bomb.x, c.y - bomb.y) < 22) {
+                        c.speed = -c.speed * 1.5;
+                        c.driftPoints = Math.max(0, c.driftPoints - 200);
+                        gameBombs.splice(idx, 1);
+                    }
+                });
+            });
+
+            if ((gameCoins.length === 0 || gameTime >= 40) && !isGameOver) {
+                const winner = p1Car.driftPoints > p2Car.driftPoints ? 'Игрок 1 (Синий)' : 'Игрок 2 (Красный)';
+                endGame(winner, Math.round((p1Car.driftPoints + p2Car.driftPoints) / 2));
+            }
+        }
+
+        /* --- HUD & OVERLAY UPDATES --- */
+        function updateHUD() {
+            document.getElementById('hud-p1-speed').innerText = `${Math.round(Math.abs(p1Car.speed * 15))} КМ/Ч`;
+            document.getElementById('hud-p2-speed').innerText = `${Math.round(Math.abs(p2Car.speed * 15))} КМ/Ч`;
+
+            document.getElementById('hud-p1-nitro').style.width = `${p1Car.nitro}%`;
+            document.getElementById('hud-p2-nitro').style.width = `${p2Car.nitro}%`;
+
+            if (gameMode === 'race') {
+                document.getElementById('hud-title').innerText = 'КРУГИ (3)';
+                document.getElementById('hud-p1-extra').innerText = `Круг: ${p1Car.laps}/3`;
+                document.getElementById('hud-p2-extra').innerText = `Круг: ${p2Car.laps}/3`;
+                document.getElementById('hud-main-status').innerText = `00:${Math.floor(gameTime).toString().padStart(2, '0')}`;
+            } else if (gameMode === 'drift' || gameMode === 'coins') {
+                document.getElementById('hud-title').innerText = gameMode === 'drift' ? 'ОЧКИ ДРИФТА' : 'МОНЕТЫ';
+                document.getElementById('hud-p1-extra').innerText = `Очки: ${p1Car.driftPoints}`;
+                document.getElementById('hud-p2-extra').innerText = `Очки: ${p2Car.driftPoints}`;
+                const timeLeft = Math.max(0, Math.ceil((gameMode === 'drift' ? 30 : 40) - gameTime));
+                document.getElementById('hud-main-status').innerText = `00:${timeLeft.toString().padStart(2, '0')}`;
+            } else if (gameMode === 'arena') {
+                document.getElementById('hud-title').innerText = 'ВЫЖИВАНИЕ';
+                document.getElementById('hud-p1-extra').innerText = p1Car.isDead ? 'ВЫБЫЛ' : 'В ИГРЕ';
+                document.getElementById('hud-p2-extra').innerText = p2Car.isDead ? 'ВЫБЫЛ' : 'В ИГРЕ';
+                document.getElementById('hud-main-status').innerText = `АРЕНА СУЖАЕТСЯ`;
+            }
+        }
+
+        function endGame(wName, rewardCoins) {
+            isGameOver = true;
+            userData.coins += Math.round(rewardCoins);
+            saveGameData();
+
+            document.getElementById('overlay-title').innerText = 'ПОБЕДА!';
+            document.getElementById('overlay-subtitle').innerText = `${wName} забирает кубок!`;
+            document.getElementById('overlay-rewards').innerText = `+${Math.round(rewardCoins)} Монет`;
+            document.getElementById('game-overlay').classList.remove('hidden');
+        }
+
+        function restartCurrentGame() {
+            initGameEngine();
+        }
+
+        // Window resize handler
+        window.addEventListener('resize', () => {
+            if (canvas && !document.getElementById('screen-game').classList.contains('hidden')) {
+                resizeCanvas();
+            }
+        });
+
+        // Initialize App on Load
+        window.onload = () => {
+            loadSaveData();
+        };
+    </script>
+</body>
+</html>
